@@ -1,0 +1,96 @@
+{
+  "_fixtureMetadata": {
+    "source": "eligibility_engine.toc_rulepacks",
+    "query": "SELECT toc_code, toc_name, scheme, allows_online_claims, max_claim_days FROM eligibility_engine.toc_rulepacks WHERE active = true",
+    "sampledAt": "2026-01-17",
+    "description": "TOC rulepack configuration for eligibility evaluation"
+  },
+  "dr15Tocs": [
+    {
+      "toc_code": "GR",
+      "toc_name": "LNER",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "VT",
+      "toc_name": "Avanti West Coast",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "TP",
+      "toc_name": "TransPennine Express",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "CC",
+      "toc_name": "c2c",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "LE",
+      "toc_name": "Greater Anglia",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "XC",
+      "toc_name": "CrossCountry",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "GW",
+      "toc_name": "Great Western Railway",
+      "scheme": "DR15",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    }
+  ],
+  "dr30Tocs": [
+    {
+      "toc_code": "SR",
+      "toc_name": "ScotRail",
+      "scheme": "DR30",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "SW",
+      "toc_name": "South Western Railway",
+      "scheme": "DR30",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "CS",
+      "toc_name": "Caledonian Sleeper",
+      "scheme": "DR30",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "TL",
+      "toc_name": "Thameslink",
+      "scheme": "DR30",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    },
+    {
+      "toc_code": "ME",
+      "toc_name": "Merseyrail",
+      "scheme": "DR30",
+      "allows_online_claims": true,
+      "max_claim_days": 28
+    }
+  ]
+}

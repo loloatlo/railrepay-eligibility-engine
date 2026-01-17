@@ -1,0 +1,101 @@
+{
+  "_fixtureMetadata": {
+    "source": "Phase 1 Specification - POST /eligibility/evaluate request format",
+    "sampledAt": "2026-01-17",
+    "description": "API request fixtures for eligibility evaluation endpoint"
+  },
+  "dr15EligibleRequest": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440001",
+    "toc_code": "GR",
+    "scheduled_departure": "2026-01-15T10:00:00Z",
+    "actual_arrival": "2026-01-15T12:20:00Z",
+    "scheduled_arrival": "2026-01-15T12:00:00Z",
+    "ticket_fare_pence": 1500,
+    "ticket_class": "standard",
+    "ticket_type": "single",
+    "ticket_restrictions": [],
+    "is_sleeper": false,
+    "journey_segments": [
+      {
+        "toc_code": "GR",
+        "fare_portion_pence": 1500
+      }
+    ]
+  },
+  "dr30IneligibleRequest": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440002",
+    "toc_code": "SW",
+    "scheduled_departure": "2026-01-15T14:00:00Z",
+    "actual_arrival": "2026-01-15T16:20:00Z",
+    "scheduled_arrival": "2026-01-15T16:00:00Z",
+    "ticket_fare_pence": 2500,
+    "ticket_class": "standard",
+    "ticket_type": "return",
+    "ticket_restrictions": [],
+    "is_sleeper": false,
+    "journey_segments": [
+      {
+        "toc_code": "SW",
+        "fare_portion_pence": 2500
+      }
+    ]
+  },
+  "sleeperRequest": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440003",
+    "toc_code": "CS",
+    "scheduled_departure": "2026-01-15T21:00:00Z",
+    "actual_arrival": "2026-01-16T09:30:00Z",
+    "scheduled_arrival": "2026-01-16T07:00:00Z",
+    "ticket_fare_pence": 15000,
+    "ticket_class": "first",
+    "ticket_type": "single",
+    "ticket_restrictions": [],
+    "is_sleeper": true,
+    "journey_segments": [
+      {
+        "toc_code": "CS",
+        "fare_portion_pence": 15000
+      }
+    ]
+  },
+  "multiTocRequest": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440004",
+    "toc_code": "GR",
+    "scheduled_departure": "2026-01-15T09:00:00Z",
+    "actual_arrival": "2026-01-15T12:20:00Z",
+    "scheduled_arrival": "2026-01-15T12:00:00Z",
+    "ticket_fare_pence": 3000,
+    "ticket_class": "standard",
+    "ticket_type": "single",
+    "ticket_restrictions": [],
+    "is_sleeper": false,
+    "journey_segments": [
+      {
+        "toc_code": "GR",
+        "fare_portion_pence": 2000
+      },
+      {
+        "toc_code": "SW",
+        "fare_portion_pence": 1000
+      }
+    ]
+  },
+  "restrictedTicketRequest": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440005",
+    "toc_code": "GR",
+    "scheduled_departure": "2026-01-15T08:00:00Z",
+    "actual_arrival": "2026-01-15T10:35:00Z",
+    "scheduled_arrival": "2026-01-15T10:00:00Z",
+    "ticket_fare_pence": 4500,
+    "ticket_class": "standard",
+    "ticket_type": "single",
+    "ticket_restrictions": ["RE", "1F"],
+    "is_sleeper": false,
+    "journey_segments": [
+      {
+        "toc_code": "GR",
+        "fare_portion_pence": 4500
+      }
+    ]
+  }
+}

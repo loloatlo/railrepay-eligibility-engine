@@ -1,0 +1,83 @@
+{
+  "_fixtureMetadata": {
+    "source": "Phase 1 Specification - POST /eligibility/evaluate response format",
+    "sampledAt": "2026-01-17",
+    "description": "Expected API response fixtures for eligibility evaluation"
+  },
+  "dr15EligibleResponse": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440001",
+    "eligible": true,
+    "scheme": "DR15",
+    "delay_minutes": 20,
+    "compensation_percentage": 25.0,
+    "compensation_pence": 375,
+    "reasons": ["Delay of 20 minutes qualifies for 25% refund under DR15 scheme"],
+    "applied_rules": ["DR15_15MIN_25PCT"],
+    "fare_breakdown": [
+      {
+        "toc_code": "GR",
+        "fare_pence": 1500,
+        "compensation_pence": 375
+      }
+    ]
+  },
+  "dr30IneligibleResponse": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440002",
+    "eligible": false,
+    "scheme": "DR30",
+    "delay_minutes": 20,
+    "compensation_percentage": 0,
+    "compensation_pence": 0,
+    "reasons": ["Delay of 20 minutes does not meet DR30 30-minute threshold"],
+    "applied_rules": []
+  },
+  "sleeperCappedResponse": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440003",
+    "eligible": true,
+    "scheme": "DR30",
+    "delay_minutes": 150,
+    "compensation_percentage": 100.0,
+    "compensation_pence": 9000,
+    "reasons": [
+      "Delay of 150 minutes qualifies for 100% refund under DR30 scheme",
+      "Sleeper fare capped at seated equivalent of 9000 pence"
+    ],
+    "applied_rules": ["DR30_120MIN_100PCT", "SLEEPER_FARE_CAP"],
+    "fare_breakdown": [
+      {
+        "toc_code": "CS",
+        "fare_pence": 15000,
+        "compensation_pence": 9000
+      }
+    ]
+  },
+  "multiTocResponse": {
+    "journey_id": "550e8400-e29b-41d4-a716-446655440004",
+    "eligible": true,
+    "scheme": "DR15",
+    "delay_minutes": 20,
+    "compensation_percentage": 16.67,
+    "compensation_pence": 500,
+    "reasons": [
+      "GR portion: 25% compensation (DR15, 20 min delay)",
+      "SW portion: Not eligible (DR30, 20 min delay below 30 min threshold)"
+    ],
+    "applied_rules": ["DR15_15MIN_25PCT", "MULTI_TOC_APPORTIONMENT"],
+    "fare_breakdown": [
+      {
+        "toc_code": "GR",
+        "fare_pence": 2000,
+        "compensation_pence": 500
+      },
+      {
+        "toc_code": "SW",
+        "fare_pence": 1000,
+        "compensation_pence": 0
+      }
+    ]
+  },
+  "notFoundResponse": {
+    "error": "Evaluation not found",
+    "journey_id": "00000000-0000-0000-0000-000000000000"
+  }
+}

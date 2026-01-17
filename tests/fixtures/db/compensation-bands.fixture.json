@@ -1,0 +1,47 @@
+{
+  "_fixtureMetadata": {
+    "source": "eligibility_engine.compensation_bands",
+    "query": "SELECT scheme_type, delay_threshold_minutes, compensation_percentage FROM eligibility_engine.compensation_bands ORDER BY scheme_type, delay_threshold_minutes",
+    "sampledAt": "2026-01-17",
+    "description": "Consumer Rights Act 2015 regulated compensation bands"
+  },
+  "dr15Bands": [
+    {
+      "scheme_type": "DR15",
+      "delay_threshold_minutes": 15,
+      "compensation_percentage": 25.0
+    },
+    {
+      "scheme_type": "DR15",
+      "delay_threshold_minutes": 30,
+      "compensation_percentage": 50.0
+    },
+    {
+      "scheme_type": "DR15",
+      "delay_threshold_minutes": 60,
+      "compensation_percentage": 50.0
+    },
+    {
+      "scheme_type": "DR15",
+      "delay_threshold_minutes": 120,
+      "compensation_percentage": 100.0
+    }
+  ],
+  "dr30Bands": [
+    {
+      "scheme_type": "DR30",
+      "delay_threshold_minutes": 30,
+      "compensation_percentage": 50.0
+    },
+    {
+      "scheme_type": "DR30",
+      "delay_threshold_minutes": 60,
+      "compensation_percentage": 50.0
+    },
+    {
+      "scheme_type": "DR30",
+      "delay_threshold_minutes": 120,
+      "compensation_percentage": 100.0
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "_fixtureMetadata": {
+    "source": "eligibility_engine.seated_fare_equivalents",
+    "query": "SELECT route_code, sleeper_class, seated_equivalent_pence, effective_from, effective_to FROM eligibility_engine.seated_fare_equivalents WHERE effective_to IS NULL OR effective_to > CURRENT_DATE",
+    "sampledAt": "2026-01-17",
+    "description": "Sleeper fare equivalents for compensation capping"
+  },
+  "caledonianSleeper": [
+    {
+      "route_code": "EUS-INV",
+      "sleeper_class": "standard_berth",
+      "seated_equivalent_pence": 8500,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    },
+    {
+      "route_code": "EUS-INV",
+      "sleeper_class": "first_berth",
+      "seated_equivalent_pence": 15000,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    },
+    {
+      "route_code": "EUS-FTW",
+      "sleeper_class": "standard_berth",
+      "seated_equivalent_pence": 7500,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    },
+    {
+      "route_code": "EUS-ABD",
+      "sleeper_class": "standard_berth",
+      "seated_equivalent_pence": 9000,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    }
+  ],
+  "nightRiviera": [
+    {
+      "route_code": "PAD-PNZ",
+      "sleeper_class": "standard_berth",
+      "seated_equivalent_pence": 6000,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    },
+    {
+      "route_code": "PAD-PNZ",
+      "sleeper_class": "first_berth",
+      "seated_equivalent_pence": 10000,
+      "effective_from": "2026-01-01",
+      "effective_to": null
+    }
+  ]
+}

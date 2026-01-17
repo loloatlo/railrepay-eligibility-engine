@@ -1,0 +1,82 @@
+{
+  "_fixtureMetadata": {
+    "source": "Phase 1 Specification - JourneyDelayConfirmed event",
+    "sampledAt": "2026-01-17",
+    "description": "Kafka event fixtures for JourneyDelayConfirmed consumption"
+  },
+  "dr15JourneyEvent": {
+    "event_type": "JourneyDelayConfirmed",
+    "event_id": "evt-550e8400-e29b-41d4-a716-446655440001",
+    "timestamp": "2026-01-15T12:25:00Z",
+    "correlation_id": "corr-550e8400-e29b-41d4-a716-446655440001",
+    "payload": {
+      "journey_id": "550e8400-e29b-41d4-a716-446655440010",
+      "toc_code": "GR",
+      "scheduled_departure": "2026-01-15T10:00:00Z",
+      "actual_arrival": "2026-01-15T12:20:00Z",
+      "scheduled_arrival": "2026-01-15T12:00:00Z",
+      "delay_minutes": 20,
+      "ticket_fare_pence": 2500,
+      "ticket_class": "standard",
+      "ticket_type": "single",
+      "ticket_restrictions": [],
+      "is_sleeper": false,
+      "journey_segments": [
+        {
+          "toc_code": "GR",
+          "fare_portion_pence": 2500
+        }
+      ]
+    }
+  },
+  "dr30JourneyEvent": {
+    "event_type": "JourneyDelayConfirmed",
+    "event_id": "evt-550e8400-e29b-41d4-a716-446655440002",
+    "timestamp": "2026-01-15T16:25:00Z",
+    "correlation_id": "corr-550e8400-e29b-41d4-a716-446655440002",
+    "payload": {
+      "journey_id": "550e8400-e29b-41d4-a716-446655440011",
+      "toc_code": "SW",
+      "scheduled_departure": "2026-01-15T14:00:00Z",
+      "actual_arrival": "2026-01-15T16:45:00Z",
+      "scheduled_arrival": "2026-01-15T16:00:00Z",
+      "delay_minutes": 45,
+      "ticket_fare_pence": 1800,
+      "ticket_class": "standard",
+      "ticket_type": "return",
+      "ticket_restrictions": [],
+      "is_sleeper": false,
+      "journey_segments": [
+        {
+          "toc_code": "SW",
+          "fare_portion_pence": 1800
+        }
+      ]
+    }
+  },
+  "sleeperJourneyEvent": {
+    "event_type": "JourneyDelayConfirmed",
+    "event_id": "evt-550e8400-e29b-41d4-a716-446655440003",
+    "timestamp": "2026-01-16T09:35:00Z",
+    "correlation_id": "corr-550e8400-e29b-41d4-a716-446655440003",
+    "payload": {
+      "journey_id": "550e8400-e29b-41d4-a716-446655440012",
+      "toc_code": "CS",
+      "scheduled_departure": "2026-01-15T21:00:00Z",
+      "actual_arrival": "2026-01-16T09:30:00Z",
+      "scheduled_arrival": "2026-01-16T07:00:00Z",
+      "delay_minutes": 150,
+      "ticket_fare_pence": 18000,
+      "ticket_class": "first",
+      "ticket_type": "single",
+      "ticket_restrictions": [],
+      "is_sleeper": true,
+      "journey_segments": [
+        {
+          "toc_code": "CS",
+          "fare_portion_pence": 18000
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "_fixtureMetadata": {
+    "source": "Phase 1 Specification - POST /eligibility/restriction/validate",
+    "sampledAt": "2026-01-17",
+    "description": "Ticket restriction validation request/response fixtures"
+  },
+  "validRestrictionRequest": {
+    "restriction_codes": ["RE", "1F"],
+    "journey_date": "2026-01-18",
+    "departure_time": "14:30"
+  },
+  "validRestrictionResponse": {
+    "valid": true,
+    "restrictions_checked": ["RE", "1F"],
+    "notes": ["Weekend restriction does not apply to travel date"]
+  },
+  "invalidRestrictionRequest": {
+    "restriction_codes": ["RE", "XA"],
+    "journey_date": "2026-01-15",
+    "departure_time": "08:30"
+  },
+  "invalidRestrictionResponse": {
+    "valid": false,
+    "restrictions_checked": ["RE", "XA"],
+    "blocking_restriction": "RE",
+    "reason": "Ticket restricted to specific service that was not delayed"
+  },
+  "weekendOnlyRequest": {
+    "restriction_codes": ["WE"],
+    "journey_date": "2026-01-15",
+    "departure_time": "10:00"
+  },
+  "weekendOnlyResponseInvalid": {
+    "valid": false,
+    "restrictions_checked": ["WE"],
+    "blocking_restriction": "WE",
+    "reason": "Ticket only valid on weekends, journey date is a weekday"
+  },
+  "offPeakRequest": {
+    "restriction_codes": ["OP"],
+    "journey_date": "2026-01-15",
+    "departure_time": "07:30"
+  },
+  "offPeakResponseInvalid": {
+    "valid": false,
+    "restrictions_checked": ["OP"],
+    "blocking_restriction": "OP",
+    "reason": "Off-peak ticket used during peak hours (before 09:30)"
+  },
+  "emptyRestrictionsRequest": {
+    "restriction_codes": [],
+    "journey_date": "2026-01-15",
+    "departure_time": "12:00"
+  },
+  "emptyRestrictionsResponse": {
+    "valid": true,
+    "restrictions_checked": [],
+    "notes": ["No restrictions to validate"]
+  }
+}
