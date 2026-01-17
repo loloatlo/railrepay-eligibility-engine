@@ -2,10 +2,11 @@
  * Entry point for Eligibility Engine service
  * Phase 3.2 Implementation (Blake)
  *
- * Starts the Express server on configured port (default 3000)
+ * Creates the Express application. Server startup is handled
+ * by createApp() which starts listening on port 3000.
  */
 
-import { createApp } from './app.js';
+import { createApp, getServer } from './app.js';
 
 // Load configuration from environment
 const config = {
@@ -18,14 +19,11 @@ const config = {
   },
 };
 
-const port = parseInt(process.env.PORT || '3000', 10);
-
-// Create and start the app
+// Create the app (server auto-starts on port 3000)
 const app = createApp(config);
+const server = getServer();
 
-const server = app.listen(port, () => {
-  console.log(`Eligibility Engine listening on port ${port}`);
-});
+console.log('Eligibility Engine listening on port 3000');
 
 // Export for testing
 export { app, server };
