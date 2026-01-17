@@ -404,19 +404,20 @@ export function createApp(config: AppConfig): Express {
     });
   });
 
-  // Auto-start server for integration tests
+  // Auto-start server for integration tests and production
   // We need to keep the same server instance to avoid port conflicts
   // Only start a new server if none exists
+  const port = parseInt(process.env.PORT || '3000', 10);
   if (!serverInstance) {
-    serverInstance = app.listen(3000, () => {
-      // Server started silently
+    serverInstance = app.listen(port, () => {
+      console.log(`Eligibility Engine listening on port ${port}`);
     });
 
     // Handle port in use errors gracefully
     serverInstance.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
         // Port already in use - this is OK
-        console.log('Port 3000 already in use, skipping auto-start');
+        console.log(`Port ${port} already in use, skipping auto-start`);
       } else {
         console.error('Server error:', err);
       }

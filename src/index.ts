@@ -19,11 +19,9 @@ const config = {
   },
 };
 
-// Create the app (server auto-starts on port 3000)
+// Create the app (server auto-starts on PORT env var or 3000)
 const app = createApp(config);
 const server = getServer();
-
-console.log('Eligibility Engine listening on port 3000');
 
 // Export for testing
 export { app, server };
