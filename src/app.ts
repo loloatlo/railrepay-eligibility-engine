@@ -87,11 +87,27 @@ export function createApp(config: AppConfig): Express {
   });
 
   // ============================================
-  // AC-5: Health Check Endpoint
+  // AC-5: Health Check Endpoints
   // ============================================
 
+  // Simple liveness check - responds immediately without DB check
+  // Used by Railway for basic health checks (per ADR-008)
+  app.get('/healthz', (req: Request, res: Response) => {
+    res.status(200).json({
+      status: 'ok',
+      service: 'eligibility-engine',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  // Full readiness check - includes database connectivity
+  // Used for deep health verification
   app.get('/health', async (req: Request, res: Response) => {
-    const client = new Client(config.database);
+    const client = new Client({
+      ...config.database,
+      connectionTimeoutMillis: 5000, // 5 second timeout for health checks
+    });
     let dbStatus = 'disconnected';
 
     try {
