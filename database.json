@@ -6,7 +6,10 @@
     "port": {"ENV": "PGPORT"},
     "database": {"ENV": "PGDATABASE"},
     "schema": "eligibility_engine",
+    "migrationsTable": "eligibility_engine_pgmigrations",
     "migrationsDir": "migrations",
-    "migrationFileLanguage": "cjs"
+    "migrationFileLanguage": "cjs",
+    "createSchema": true,
+    "createMigrationsSchema": true
   }
 }
