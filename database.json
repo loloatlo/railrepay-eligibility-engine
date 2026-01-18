@@ -1,16 +1,14 @@
 {
-  "default": {
-    "user": {"ENV": "PGUSER"},
-    "password": {"ENV": "PGPASSWORD"},
-    "host": {"ENV": "PGHOST"},
-    "port": {"ENV": "PGPORT"},
-    "database": {"ENV": "PGDATABASE"},
-    "schema": "eligibility_engine",
-    "migrations-table": "eligibility_engine_pgmigrations",
-    "migrations-dir": "migrations",
-    "migration-file-language": "cjs",
-    "create-schema": true,
-    "migrations-schema": "eligibility_engine",
-    "create-migrations-schema": true
-  }
+  "user": {"ENV": "PGUSER"},
+  "password": {"ENV": "PGPASSWORD"},
+  "host": {"ENV": "PGHOST"},
+  "port": {"ENV": "PGPORT"},
+  "database": {"ENV": "PGDATABASE"},
+  "schema": "eligibility_engine",
+  "migrations-table": "eligibility_engine_pgmigrations",
+  "migrations-dir": "migrations",
+  "migration-file-language": "cjs",
+  "create-schema": true,
+  "migrations-schema": "eligibility_engine",
+  "create-migrations-schema": true
 }
