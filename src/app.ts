@@ -1,18 +1,31 @@
 /**
  * Express Application - Eligibility Engine API
  * Phase 3.2 Implementation (Blake)
+ * Updated: Phase TD-2 (Blake) - Logger and Metrics integration
  *
  * Covers:
  * - AC-4: Retrieve evaluation by journey_id
  * - AC-5: Health check endpoint
  * - POST /eligibility/evaluate
  * - POST /eligibility/restriction/validate
+ *
+ * TD Remediation:
+ * - TD-ELIGIBILITY-003: Uses @railrepay/winston-logger instead of console.*
+ * - TD-ELIGIBILITY-004: Integrates @railrepay/metrics-pusher for observability
  */
 
 import express, { Express, Request, Response, NextFunction } from 'express';
 import { Client } from 'pg';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 import { RestrictionValidator } from './services/restriction-validator.js';
+import { getLogger, createChildLogger } from './lib/logger.js';
+import {
+  initMetrics,
+  getMetricsMiddleware,
+  recordEvaluation,
+  httpRequestsTotal,
+  httpRequestDuration,
+} from './lib/metrics.js';
 
 // ============================================
 // Type Definitions
@@ -58,7 +71,7 @@ interface RestrictionValidateBody {
 
 // Server instance for testing - singleton pattern
 let serverInstance: ReturnType<Express['listen']> | null = null;
-let currentApp: Express | null = null;
+let _currentApp: Express | null = null;
 
 /**
  * Create Express app and automatically start server on port 3000
@@ -70,7 +83,13 @@ let currentApp: Express | null = null;
  */
 export function createApp(config: AppConfig): Express {
   const app = express();
-  currentApp = app;
+  _currentApp = app;
+
+  // Get logger instance
+  const logger = getLogger();
+
+  // Initialize metrics
+  initMetrics();
 
   // CRITICAL: Required for Railway/proxy environments (per SOPs)
   app.set('trust proxy', true);
@@ -83,8 +102,43 @@ export function createApp(config: AppConfig): Express {
     const correlationId = req.get('X-Correlation-ID') || uuidv4();
     res.set('X-Correlation-ID', correlationId);
     (req as any).correlationId = correlationId;
+
+    // Create child logger with correlation ID for this request
+    (req as any).logger = createChildLogger(correlationId);
+
     next();
   });
+
+  // Request timing and metrics middleware
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const startTime = process.hrtime();
+
+    res.on('finish', () => {
+      const [seconds, nanoseconds] = process.hrtime(startTime);
+      const durationSeconds = seconds + nanoseconds / 1e9;
+
+      // Record HTTP metrics
+      httpRequestsTotal.inc({
+        method: req.method,
+        path: req.route?.path || req.path,
+        status: res.statusCode.toString(),
+      });
+
+      httpRequestDuration.observe(
+        { method: req.method, path: req.route?.path || req.path },
+        durationSeconds
+      );
+    });
+
+    next();
+  });
+
+  // ============================================
+  // Metrics Endpoint
+  // ============================================
+
+  // Mount metrics router at /metrics
+  app.use('/metrics', getMetricsMiddleware());
 
   // ============================================
   // AC-5: Health Check Endpoints
@@ -147,6 +201,7 @@ export function createApp(config: AppConfig): Express {
 
   app.get('/eligibility/:journey_id', async (req: Request, res: Response) => {
     const { journey_id } = req.params;
+    const reqLogger = (req as any).logger || logger;
 
     // Validate UUID format
     if (!uuidValidate(journey_id)) {
@@ -194,6 +249,11 @@ export function createApp(config: AppConfig): Express {
         evaluation_timestamp: row.evaluation_timestamp,
       });
     } catch (error) {
+      reqLogger.error('Failed to retrieve evaluation', {
+        component: 'eligibility-api',
+        journey_id,
+        error: (error as Error).message,
+      });
       try {
         await client.end();
       } catch (e) {
@@ -209,6 +269,8 @@ export function createApp(config: AppConfig): Express {
 
   app.post('/eligibility/evaluate', async (req: Request, res: Response) => {
     const body: EvaluateRequestBody = req.body;
+    const reqLogger = (req as any).logger || logger;
+    const startTime = process.hrtime();
 
     // Validate required fields
     const validationErrors: string[] = [];
@@ -251,6 +313,13 @@ export function createApp(config: AppConfig): Express {
         // Return existing evaluation (idempotent response)
         const row = existingResult.rows[0];
         await client.end();
+
+        reqLogger.info('Returning cached evaluation (idempotent)', {
+          component: 'eligibility-api',
+          journey_id: body.journey_id,
+          eligible: row.eligible,
+        });
+
         return res.status(200).json({
           journey_id: row.journey_id,
           eligible: row.eligible,
@@ -295,6 +364,7 @@ export function createApp(config: AppConfig): Express {
       let compensationPence: number;
       let reasons: string[];
       let appliedRules: string[];
+      let ineligibleReason = 'unknown';
 
       if (!tocRulepack.is_active) {
         eligible = false;
@@ -302,6 +372,7 @@ export function createApp(config: AppConfig): Express {
         compensationPence = 0;
         reasons = ['TOC is not active for delay repay claims'];
         appliedRules = [];
+        ineligibleReason = 'toc_inactive';
       } else {
         // Get compensation band
         const bandResult = await client.query(
@@ -322,6 +393,7 @@ export function createApp(config: AppConfig): Express {
           const threshold = scheme === 'DR15' ? 15 : 30;
           reasons = [`Delay of ${delayMinutes} minutes does not meet ${scheme} ${threshold}-minute threshold`];
           appliedRules = [];
+          ineligibleReason = 'below_threshold';
         } else {
           const band = bandResult.rows[0];
           eligible = true;
@@ -361,6 +433,29 @@ export function createApp(config: AppConfig): Express {
 
       await client.end();
 
+      // Calculate duration and record metrics
+      const [seconds, nanoseconds] = process.hrtime(startTime);
+      const durationSeconds = seconds + nanoseconds / 1e9;
+
+      recordEvaluation({
+        tocCode: body.toc_code,
+        scheme,
+        eligible,
+        durationSeconds,
+        ineligibleReason: eligible ? undefined : ineligibleReason,
+      });
+
+      reqLogger.info('Eligibility evaluation completed', {
+        component: 'eligibility-api',
+        journey_id: body.journey_id,
+        toc_code: body.toc_code,
+        scheme,
+        eligible,
+        delay_minutes: delayMinutes,
+        compensation_pence: compensationPence,
+        duration_ms: Math.round(durationSeconds * 1000),
+      });
+
       return res.status(200).json({
         journey_id: body.journey_id,
         eligible,
@@ -374,6 +469,11 @@ export function createApp(config: AppConfig): Express {
         evaluation_timestamp: evaluationTimestamp,
       });
     } catch (error) {
+      reqLogger.error('Evaluation failed', {
+        component: 'eligibility-api',
+        journey_id: body.journey_id,
+        error: (error as Error).message,
+      });
       try {
         await client.end();
       } catch (e) {
@@ -412,8 +512,13 @@ export function createApp(config: AppConfig): Express {
   // Error Handler
   // ============================================
 
-  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error('Unhandled error:', err);
+  app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+    const reqLogger = (req as any).logger || logger;
+    reqLogger.error('Unhandled error', {
+      component: 'eligibility-api',
+      error: err.message,
+      stack: err.stack,
+    });
     res.status(500).json({
       error: 'Internal server error',
       message: err.message,
@@ -426,16 +531,26 @@ export function createApp(config: AppConfig): Express {
   const port = parseInt(process.env.PORT || '3000', 10);
   if (!serverInstance) {
     serverInstance = app.listen(port, () => {
-      console.log(`Eligibility Engine listening on port ${port}`);
+      logger.info('Eligibility Engine started', {
+        component: 'server',
+        port,
+      });
     });
 
     // Handle port in use errors gracefully
     serverInstance.on('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
         // Port already in use - this is OK
-        console.log(`Port ${port} already in use, skipping auto-start`);
+        logger.warn('Port already in use, skipping auto-start', {
+          component: 'server',
+          port,
+        });
       } else {
-        console.error('Server error:', err);
+        logger.error('Server error', {
+          component: 'server',
+          error: err.message,
+          code: err.code,
+        });
       }
     });
   } else {
