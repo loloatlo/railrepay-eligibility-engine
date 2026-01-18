@@ -12,4 +12,4 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 # Run migrations before starting the service
 # This ensures the database schema is up-to-date before the app starts
-startCommand = "npm run migrate:up && npm start"
+startCommand = "npm run migrate:up && echo 'Starting server...' && npm start"
