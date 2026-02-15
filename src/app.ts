@@ -287,7 +287,7 @@ export function createApp(config: AppConfig): Express {
     if (body.delay_minutes === undefined && (!body.scheduled_arrival || !body.actual_arrival)) {
       validationErrors.push('delay_minutes or (scheduled_arrival and actual_arrival) is required');
     }
-    if (!body.ticket_fare_pence) {
+    if (body.ticket_fare_pence === undefined || body.ticket_fare_pence === null) {
       validationErrors.push('ticket_fare_pence is required');
     }
 
