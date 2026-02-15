@@ -74,13 +74,13 @@ describe('MultiTocApportioner', () => {
         .mockResolvedValueOnce({
           toc_code: 'GR',
           scheme: 'DR15',
-          is_active: true,
+          active: true,
         })
         // Mock SW as DR30 (30-minute threshold)
         .mockResolvedValueOnce({
           toc_code: 'SW',
           scheme: 'DR30',
-          is_active: true,
+          active: true,
         });
 
       // Act - This will fail until MultiTocApportioner is implemented
@@ -133,12 +133,12 @@ describe('MultiTocApportioner', () => {
         .mockResolvedValueOnce({
           toc_code: 'GR',
           scheme: 'DR15',
-          is_active: true,
+          active: true,
         })
         .mockResolvedValueOnce({
           toc_code: 'SW',
           scheme: 'DR30',
-          is_active: true,
+          active: true,
         });
 
       // Act
@@ -186,9 +186,9 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'VT', scheme: 'DR15', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true })
+        .mockResolvedValueOnce({ toc_code: 'VT', scheme: 'DR15', active: true });
 
       // Act
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -234,7 +234,7 @@ describe('MultiTocApportioner', () => {
       mockTocRulepackRepository.findByTocCode.mockResolvedValue({
         toc_code: 'GR',
         scheme: 'DR15',
-        is_active: true,
+        active: true,
       });
 
       // Act
@@ -271,8 +271,8 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SR', scheme: 'DR30', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SR', scheme: 'DR30', active: true });
 
       // Act
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -311,7 +311,7 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
         .mockResolvedValueOnce(null); // Unknown TOC
 
       // Act
@@ -346,8 +346,8 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'ME', scheme: 'DR30', is_active: false });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'ME', scheme: 'DR30', active: false });
 
       // Act
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -381,8 +381,8 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true });
 
       // Act & Assert
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -425,9 +425,9 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'VT', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'VT', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true });
 
       // Act
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -456,8 +456,8 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true });
 
       // Act
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -488,7 +488,7 @@ describe('MultiTocApportioner', () => {
       mockTocRulepackRepository.findByTocCode.mockResolvedValue({
         toc_code: 'GR',
         scheme: 'DR15',
-        is_active: true,
+        active: true,
       });
 
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -511,7 +511,7 @@ describe('MultiTocApportioner', () => {
       mockTocRulepackRepository.findByTocCode.mockResolvedValue({
         toc_code: 'GR',
         scheme: 'DR15',
-        is_active: true,
+        active: true,
       });
 
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -534,7 +534,7 @@ describe('MultiTocApportioner', () => {
       mockTocRulepackRepository.findByTocCode.mockResolvedValue({
         toc_code: 'GR',
         scheme: 'DR15',
-        is_active: true,
+        active: true,
       });
 
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
@@ -557,8 +557,8 @@ describe('MultiTocApportioner', () => {
       };
 
       mockTocRulepackRepository.findByTocCode
-        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', is_active: true })
-        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', is_active: true });
+        .mockResolvedValueOnce({ toc_code: 'GR', scheme: 'DR15', active: true })
+        .mockResolvedValueOnce({ toc_code: 'SW', scheme: 'DR30', active: true });
 
       const { MultiTocApportioner } = await import('../../src/services/multi-toc-apportioner.js');
       const apportioner = new MultiTocApportioner(mockTocRulepackRepository);

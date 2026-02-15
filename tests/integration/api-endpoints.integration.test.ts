@@ -66,7 +66,7 @@ describe('Eligibility Engine API Endpoints', () => {
         toc_code VARCHAR(5) PRIMARY KEY,
         toc_name VARCHAR(100) NOT NULL,
         scheme VARCHAR(10) NOT NULL CHECK (scheme IN ('DR15', 'DR30')),
-        is_active BOOLEAN NOT NULL DEFAULT true,
+        active BOOLEAN NOT NULL DEFAULT true,
         effective_from DATE NOT NULL,
         effective_to DATE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -75,15 +75,14 @@ describe('Eligibility Engine API Endpoints', () => {
 
       CREATE TABLE eligibility_engine.compensation_bands (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        scheme VARCHAR(10) NOT NULL,
-        delay_minutes_min INTEGER NOT NULL,
-        delay_minutes_max INTEGER,
+        scheme_type VARCHAR(10) NOT NULL,
+        delay_threshold_minutes INTEGER NOT NULL,
         compensation_percentage DECIMAL(5,2) NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE eligibility_engine.eligibility_evaluations (
-        evaluation_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         journey_id UUID NOT NULL,
         toc_code VARCHAR(5) NOT NULL,
         scheme VARCHAR(10) NOT NULL,
@@ -92,28 +91,30 @@ describe('Eligibility Engine API Endpoints', () => {
         eligible BOOLEAN NOT NULL,
         compensation_percentage DECIMAL(5,2),
         compensation_pence INTEGER,
-        reasons TEXT[],
-        applied_rules TEXT[],
-        evaluation_timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        reasons JSONB,
+        applied_rules JSONB,
+        fare_breakdown JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         UNIQUE (journey_id)
       );
 
       -- Seed DR15 and DR30 TOCs
-      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, toc_name, scheme, is_active, effective_from) VALUES
+      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, toc_name, scheme, active, effective_from) VALUES
         ('GR', 'LNER', 'DR15', true, '2020-01-01'),
         ('VT', 'Avanti West Coast', 'DR15', true, '2020-01-01'),
         ('SW', 'South Western Railway', 'DR30', true, '2020-01-01'),
         ('SR', 'ScotRail', 'DR30', true, '2020-01-01');
 
       -- Seed compensation bands
-      INSERT INTO eligibility_engine.compensation_bands (scheme, delay_minutes_min, delay_minutes_max, compensation_percentage) VALUES
-        ('DR15', 15, 29, 25.00),
-        ('DR15', 30, 59, 50.00),
-        ('DR15', 60, 119, 50.00),
-        ('DR15', 120, NULL, 100.00),
-        ('DR30', 30, 59, 50.00),
-        ('DR30', 60, 119, 50.00),
-        ('DR30', 120, NULL, 100.00);
+      INSERT INTO eligibility_engine.compensation_bands (scheme_type, delay_threshold_minutes, compensation_percentage) VALUES
+        ('DR15', 15, 25.00),
+        ('DR15', 30, 50.00),
+        ('DR15', 60, 50.00),
+        ('DR15', 120, 100.00),
+        ('DR30', 30, 50.00),
+        ('DR30', 60, 50.00),
+        ('DR30', 120, 100.00);
     `);
 
     // The app will be started by Blake's implementation
@@ -217,16 +218,15 @@ describe('Eligibility Engine API Endpoints', () => {
       // Insert a test evaluation
       await dbClient.query(`
         INSERT INTO eligibility_engine.eligibility_evaluations (
-          evaluation_id, journey_id, toc_code, scheme, delay_minutes,
+          id, journey_id, toc_code, scheme, delay_minutes,
           ticket_fare_pence, eligible, compensation_percentage, compensation_pence,
-          reasons, applied_rules, evaluation_timestamp
+          reasons, applied_rules
         ) VALUES (
           '550e8400-e29b-41d4-a716-446655440001',
           '550e8400-e29b-41d4-a716-446655440010',
           'GR', 'DR15', 20, 2500, true, 25.00, 625,
-          ARRAY['Delay of 20 minutes qualifies for 25% refund under DR15 scheme'],
-          ARRAY['DR15_15MIN_25PCT'],
-          '2026-01-15T12:26:00Z'
+          '["Delay of 20 minutes qualifies for 25% refund under DR15 scheme"]'::jsonb,
+          '["DR15_15MIN_25PCT"]'::jsonb
         )
       `);
     });

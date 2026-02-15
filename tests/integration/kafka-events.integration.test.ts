@@ -69,7 +69,7 @@ describe('Kafka Event Handling', () => {
         toc_code VARCHAR(5) PRIMARY KEY,
         toc_name VARCHAR(100) NOT NULL,
         scheme VARCHAR(10) NOT NULL CHECK (scheme IN ('DR15', 'DR30')),
-        is_active BOOLEAN NOT NULL DEFAULT true,
+        active BOOLEAN NOT NULL DEFAULT true,
         effective_from DATE NOT NULL,
         effective_to DATE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -78,15 +78,14 @@ describe('Kafka Event Handling', () => {
 
       CREATE TABLE eligibility_engine.compensation_bands (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        scheme VARCHAR(10) NOT NULL,
-        delay_minutes_min INTEGER NOT NULL,
-        delay_minutes_max INTEGER,
+        scheme_type VARCHAR(10) NOT NULL,
+        delay_threshold_minutes INTEGER NOT NULL,
         compensation_percentage DECIMAL(5,2) NOT NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
 
       CREATE TABLE eligibility_engine.eligibility_evaluations (
-        evaluation_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         journey_id UUID NOT NULL,
         toc_code VARCHAR(5) NOT NULL,
         scheme VARCHAR(10) NOT NULL,
@@ -95,9 +94,11 @@ describe('Kafka Event Handling', () => {
         eligible BOOLEAN NOT NULL,
         compensation_percentage DECIMAL(5,2),
         compensation_pence INTEGER,
-        reasons TEXT[],
-        applied_rules TEXT[],
-        evaluation_timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        reasons JSONB,
+        applied_rules JSONB,
+        fare_breakdown JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         UNIQUE (journey_id)
       );
 
@@ -113,20 +114,20 @@ describe('Kafka Event Handling', () => {
       );
 
       -- Seed TOC rulepacks
-      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, toc_name, scheme, is_active, effective_from) VALUES
+      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, toc_name, scheme, active, effective_from) VALUES
         ('GR', 'LNER', 'DR15', true, '2020-01-01'),
         ('SW', 'South Western Railway', 'DR30', true, '2020-01-01'),
         ('CS', 'Caledonian Sleeper', 'DR15', true, '2020-01-01');
 
       -- Seed compensation bands
-      INSERT INTO eligibility_engine.compensation_bands (scheme, delay_minutes_min, delay_minutes_max, compensation_percentage) VALUES
-        ('DR15', 15, 29, 25.00),
-        ('DR15', 30, 59, 50.00),
-        ('DR15', 60, 119, 50.00),
-        ('DR15', 120, NULL, 100.00),
-        ('DR30', 30, 59, 50.00),
-        ('DR30', 60, 119, 50.00),
-        ('DR30', 120, NULL, 100.00);
+      INSERT INTO eligibility_engine.compensation_bands (scheme_type, delay_threshold_minutes, compensation_percentage) VALUES
+        ('DR15', 15, 25.00),
+        ('DR15', 30, 50.00),
+        ('DR15', 60, 50.00),
+        ('DR15', 120, 100.00),
+        ('DR30', 30, 50.00),
+        ('DR30', 60, 50.00),
+        ('DR30', 120, 100.00);
     `);
   }, 60000);
 

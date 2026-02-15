@@ -64,12 +64,11 @@ export interface HandlerOptions {
 interface TocRulepack {
   toc_code: string;
   scheme: string;
-  is_active: boolean;
+  active: boolean;
 }
 
 interface CompensationBand {
-  delay_minutes_min: number;
-  delay_minutes_max: number | null;
+  delay_threshold_minutes: number;
   compensation_percentage: number;
 }
 
@@ -115,7 +114,7 @@ export class JourneyDelayConfirmedHandler {
 
       // Look up TOC rulepack
       const tocResult = await client.query(
-        'SELECT toc_code, scheme, is_active FROM eligibility_engine.toc_rulepacks WHERE toc_code = $1',
+        'SELECT toc_code, scheme, active FROM eligibility_engine.toc_rulepacks WHERE toc_code = $1',
         [event.payload.toc_code]
       );
 
@@ -138,7 +137,7 @@ export class JourneyDelayConfirmedHandler {
         const tocRulepack: TocRulepack = tocResult.rows[0];
         scheme = tocRulepack.scheme;
 
-        if (!tocRulepack.is_active) {
+        if (!tocRulepack.active) {
           eligible = false;
           compensationPercentage = 0;
           compensationPence = 0;
@@ -147,12 +146,11 @@ export class JourneyDelayConfirmedHandler {
         } else {
           // Get compensation band
           const bandResult = await client.query(
-            `SELECT delay_minutes_min, delay_minutes_max, compensation_percentage
+            `SELECT delay_threshold_minutes, compensation_percentage
              FROM eligibility_engine.compensation_bands
-             WHERE scheme = $1
-               AND delay_minutes_min <= $2
-               AND (delay_minutes_max IS NULL OR delay_minutes_max >= $2)
-             ORDER BY delay_minutes_min DESC
+             WHERE scheme_type = $1
+               AND delay_threshold_minutes <= $2
+             ORDER BY delay_threshold_minutes DESC
              LIMIT 1`,
             [scheme, event.payload.delay_minutes]
           );
@@ -173,7 +171,7 @@ export class JourneyDelayConfirmedHandler {
               (event.payload.ticket_fare_pence * compensationPercentage) / 100
             );
             reasons = [`Delay of ${event.payload.delay_minutes} minutes qualifies for ${compensationPercentage}% refund under ${scheme} scheme`];
-            appliedRules = [`${scheme}_${band.delay_minutes_min}MIN_${Math.round(compensationPercentage)}PCT`];
+            appliedRules = [`${scheme}_${band.delay_threshold_minutes}MIN_${Math.round(compensationPercentage)}PCT`];
           }
         }
       }
@@ -186,10 +184,10 @@ export class JourneyDelayConfirmedHandler {
       // Insert evaluation
       await client.query(
         `INSERT INTO eligibility_engine.eligibility_evaluations (
-          evaluation_id, journey_id, toc_code, scheme, delay_minutes,
+          id, journey_id, toc_code, scheme, delay_minutes,
           ticket_fare_pence, eligible, compensation_percentage, compensation_pence,
-          reasons, applied_rules, evaluation_timestamp
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          reasons, applied_rules
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           evaluationId,
           event.payload.journey_id,
@@ -200,9 +198,8 @@ export class JourneyDelayConfirmedHandler {
           eligible,
           compensationPercentage,
           compensationPence,
-          reasons,
-          appliedRules,
-          evaluationTimestamp,
+          JSON.stringify(reasons),
+          JSON.stringify(appliedRules),
         ]
       );
 

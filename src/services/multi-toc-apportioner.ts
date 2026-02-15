@@ -46,7 +46,7 @@ export interface ApportionmentResult {
 export interface TocRulepack {
   toc_code: string;
   scheme: string;
-  is_active: boolean;
+  active: boolean;
 }
 
 // Repository interface
@@ -159,7 +159,7 @@ export class MultiTocApportioner {
     }
 
     // Inactive TOC
-    if (!tocRulepack.is_active) {
+    if (!tocRulepack.active) {
       return {
         toc_code: segment.toc_code,
         segment_order: segment.segment_order,

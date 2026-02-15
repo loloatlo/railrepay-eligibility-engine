@@ -51,21 +51,20 @@ describe('TD-ELIGIBILITY-004: Metrics Endpoint Integration', () => {
       CREATE TABLE IF NOT EXISTS eligibility_engine.toc_rulepacks (
         toc_code VARCHAR(5) PRIMARY KEY,
         scheme VARCHAR(10) NOT NULL,
-        is_active BOOLEAN DEFAULT true
+        active BOOLEAN DEFAULT true
       )
     `);
     await dbClient.query(`
       CREATE TABLE IF NOT EXISTS eligibility_engine.compensation_bands (
         id SERIAL PRIMARY KEY,
-        scheme VARCHAR(10) NOT NULL,
-        delay_minutes_min INT NOT NULL,
-        delay_minutes_max INT,
+        scheme_type VARCHAR(10) NOT NULL,
+        delay_threshold_minutes INT NOT NULL,
         compensation_percentage DECIMAL(5,2) NOT NULL
       )
     `);
     await dbClient.query(`
       CREATE TABLE IF NOT EXISTS eligibility_engine.eligibility_evaluations (
-        evaluation_id UUID PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         journey_id UUID NOT NULL UNIQUE,
         toc_code VARCHAR(5) NOT NULL,
         scheme VARCHAR(10) NOT NULL,
@@ -74,21 +73,23 @@ describe('TD-ELIGIBILITY-004: Metrics Endpoint Integration', () => {
         eligible BOOLEAN NOT NULL,
         compensation_percentage DECIMAL(5,2) NOT NULL,
         compensation_pence INT NOT NULL,
-        reasons TEXT[] NOT NULL,
-        applied_rules TEXT[] NOT NULL,
-        evaluation_timestamp TIMESTAMPTZ NOT NULL
+        reasons JSONB NOT NULL,
+        applied_rules JSONB NOT NULL,
+        fare_breakdown JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `);
 
     // Insert test data
     await dbClient.query(`
-      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, scheme, is_active)
+      INSERT INTO eligibility_engine.toc_rulepacks (toc_code, scheme, active)
       VALUES ('GWR', 'DR30', true)
       ON CONFLICT (toc_code) DO NOTHING
     `);
     await dbClient.query(`
-      INSERT INTO eligibility_engine.compensation_bands (scheme, delay_minutes_min, delay_minutes_max, compensation_percentage)
-      VALUES ('DR30', 30, 59, 50.00), ('DR30', 60, 119, 100.00)
+      INSERT INTO eligibility_engine.compensation_bands (scheme_type, delay_threshold_minutes, compensation_percentage)
+      VALUES ('DR30', 30, 50.00), ('DR30', 60, 100.00)
       ON CONFLICT DO NOTHING
     `);
 
