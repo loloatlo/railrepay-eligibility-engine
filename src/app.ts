@@ -220,7 +220,7 @@ export function createApp(config: AppConfig): Express {
         `SELECT
           journey_id, eligible, scheme, delay_minutes,
           compensation_percentage, compensation_pence, ticket_fare_pence,
-          reasons, applied_rules, evaluation_timestamp
+          reasons, applied_rules, created_at
          FROM eligibility_engine.eligibility_evaluations
          WHERE journey_id = $1`,
         [journey_id]
@@ -246,7 +246,7 @@ export function createApp(config: AppConfig): Express {
         ticket_fare_pence: row.ticket_fare_pence,
         reasons: row.reasons,
         applied_rules: row.applied_rules,
-        evaluation_timestamp: row.evaluation_timestamp,
+        evaluation_timestamp: row.created_at,
       });
     } catch (error) {
       reqLogger.error('Failed to retrieve evaluation', {
@@ -330,7 +330,7 @@ export function createApp(config: AppConfig): Express {
           ticket_fare_pence: row.ticket_fare_pence,
           reasons: row.reasons,
           applied_rules: row.applied_rules,
-          evaluation_timestamp: row.evaluation_timestamp,
+          evaluation_timestamp: row.created_at,
         });
       }
 
@@ -376,12 +376,11 @@ export function createApp(config: AppConfig): Express {
       } else {
         // Get compensation band
         const bandResult = await client.query(
-          `SELECT delay_minutes_min, delay_minutes_max, compensation_percentage
+          `SELECT delay_threshold_minutes, compensation_percentage
            FROM eligibility_engine.compensation_bands
-           WHERE scheme = $1
-             AND delay_minutes_min <= $2
-             AND (delay_minutes_max IS NULL OR delay_minutes_max >= $2)
-           ORDER BY delay_minutes_min DESC
+           WHERE scheme_type = $1
+             AND delay_threshold_minutes <= $2
+           ORDER BY delay_threshold_minutes DESC
            LIMIT 1`,
           [scheme, delayMinutes]
         );
@@ -400,7 +399,7 @@ export function createApp(config: AppConfig): Express {
           compensationPercentage = parseFloat(band.compensation_percentage);
           compensationPence = Math.floor((body.ticket_fare_pence * compensationPercentage) / 100);
           reasons = [`Delay of ${delayMinutes} minutes qualifies for ${compensationPercentage}% refund under ${scheme} scheme`];
-          appliedRules = [`${scheme}_${band.delay_minutes_min}MIN_${Math.round(compensationPercentage)}PCT`];
+          appliedRules = [`${scheme}_${band.delay_threshold_minutes}MIN_${Math.round(compensationPercentage)}PCT`];
         }
       }
 
@@ -411,10 +410,10 @@ export function createApp(config: AppConfig): Express {
 
       await client.query(
         `INSERT INTO eligibility_engine.eligibility_evaluations (
-          evaluation_id, journey_id, toc_code, scheme, delay_minutes,
+          id, journey_id, toc_code, scheme, delay_minutes,
           ticket_fare_pence, eligible, compensation_percentage, compensation_pence,
-          reasons, applied_rules, evaluation_timestamp
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+          reasons, applied_rules
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
         [
           evaluationId,
           body.journey_id,
@@ -427,7 +426,6 @@ export function createApp(config: AppConfig): Express {
           compensationPence,
           reasons,
           appliedRules,
-          evaluationTimestamp,
         ]
       );
 
