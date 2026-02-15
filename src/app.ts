@@ -344,7 +344,7 @@ export function createApp(config: AppConfig): Express {
 
       // Look up TOC rulepack
       const tocResult = await client.query(
-        'SELECT toc_code, scheme, is_active FROM eligibility_engine.toc_rulepacks WHERE toc_code = $1',
+        'SELECT toc_code, scheme, active FROM eligibility_engine.toc_rulepacks WHERE toc_code = $1',
         [body.toc_code]
       );
 
@@ -366,7 +366,7 @@ export function createApp(config: AppConfig): Express {
       let appliedRules: string[];
       let ineligibleReason = 'unknown';
 
-      if (!tocRulepack.is_active) {
+      if (!tocRulepack.active) {
         eligible = false;
         compensationPercentage = 0;
         compensationPence = 0;
