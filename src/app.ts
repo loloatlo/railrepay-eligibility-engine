@@ -424,8 +424,8 @@ export function createApp(config: AppConfig): Express {
           eligible,
           compensationPercentage,
           compensationPence,
-          reasons,
-          appliedRules,
+          JSON.stringify(reasons),
+          JSON.stringify(appliedRules),
         ]
       );
 
